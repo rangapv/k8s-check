@@ -5,8 +5,6 @@ gcount=0
 filecheck() {
 f1=("$@")
 tf="$#"
-echo "f1 is $f1"
-echo "tf is $tf"
 
 for f in "${f1[@]}" 
 do
@@ -34,6 +32,22 @@ ssmstat aws-access-2 $skfsac2s
 
 }
 
+
+filesecretdel() {
+
+
+kfsd=`kubectl delete secret aws-secret -n kube-system`
+kfsds="$?"
+ssmstat aws-secret-delete $kfsds
+kfsac1d=`kubectl delete secret aws-access-1 -n kube-system`
+kfsac1ds="$?"
+ssmstat aws-access-1-delete $kfsac1ds
+kfsac2d=`kubectl delete secret aws-access-2 -n kube-system`
+kfsac2ds="$?"
+ssmstat aws-access-2-delete $kfsac2ds
+
+}
+
 ssmstat() {
 
 ssmstat1="$@"
@@ -45,6 +59,16 @@ else
 	echo "$1 create failed"
 fi
 }
+
+
+if [[ "$1" = "-d" ]]
+then
+	filesecretdel
+	exit
+fi
+
+
+
 
 filecheck /etc/kubernetes/aws.conf $HOME/.kube/config $HOME/access_id $HOME/secret_id 
 
