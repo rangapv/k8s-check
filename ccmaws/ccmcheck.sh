@@ -3,16 +3,21 @@ set -E
 gcount=0
 
 filecheck() {
-f1="$@"
+f1=("$@")
+tf="$#"
+echo "f1 is $f1"
+echo "tf is $tf"
 
-if [[ -f $f1 ]]
+for f in "${f1[@]}" 
+do
+if [[ -f $f ]]
 then
 	((gcount+=1))
 else
-	echo "File does not exist $f1"
+	echo "File does not exist $f"
 	exit
 fi
-
+done
 }
 
 filesecret() {
@@ -41,12 +46,9 @@ else
 fi
 }
 
-filecheck /etc/kubernetes/aws.conf
-filecheck $HOME/.kube/config
-filecheck $HOME/access_id 
-filecheck $HOME/secret_id
+filecheck /etc/kubernetes/aws.conf $HOME/.kube/config $HOME/access_id $HOME/secret_id 
 
-if [[ $gcount -eq 4 ]]
+if [[ $gcount -eq $tf ]]
 then
 	echo "All the files required to create the aws-secret are present"
 	filesecret 
