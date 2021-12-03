@@ -24,13 +24,26 @@ else
 fi
 }
 
-sts=`kubectl describe secret aws-secret -n kube-system`
-stss="$?"
+secretchk() {
 
-if [[ $stss -eq 0 ]]
+secchk="$@"
+secchkt="$#"
+
+for s in "${secchk[@]}"
+do
+sts=`kubectl describe secret $s  -n kube-system`
+stss="$?"
+if [[ $stss -ne 0 ]]
 then
-	echo "aws-secret present"
-	ccmimage
-else
-	echo "aws-secret not-present"
+	echo "The secret $s is missing...exiting"
+	exit
 fi
+done
+
+echo "Total $secchkt secrets checked and Found"
+echo "Applying Cloud Controller Manager control loops and RBAC... sit back and relax"
+ccmimage
+}
+
+secretchk aws-secret aws-access-1 aws-access-2
+

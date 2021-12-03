@@ -20,15 +20,20 @@ done
 
 filesecret() {
 
-kfs=`kubectl create secret generic aws-secret --from-file=aws.conf=/etc/kubernetes/aws.conf --from-file=config=$HOME/.kube/config --from-file=AWS_ACCESS_KEY_ID=$HOME/access_id --from-file=AWS_SECRET_ACCESS_KEY=$HOME/secret_id -n kube-system`
+kfs=`kubectl create secret generic aws-secret --from-file=aws.conf=/etc/kubernetes/aws.conf --from-file=config=$HOME/.kube/config -n kube-system`
 skfs="$?"
 
-kfsac1=`kubectl create secret generic aws-access-1 --from-file=AWS_ACCESS_KEY_ID=$HOME/access_id -n kube-system`
+echo "Pls input Access key ID for aws"
+read access1
+echo "Pls input Secret key ID for aws"
+read access2
+
+kfsac1=`kubectl create secret generic aws-access-1 --from-literal=AWS_ACCESS_KEY_ID=$access1 -n kube-system`
 skfsac1s="$?"
-ssmstat aws-access-1 $skfsac1s
-kfsac2=`kubectl create secret generic aws-access-2 --from-file=AWS_SECRET_ACCESS_KEY=$HOME/secret_id -n kube-system`
+ssmstat aws-access-1-create $skfsac1s
+kfsac2=`kubectl create secret generic aws-access-2 --from-literal=AWS_SECRET_ACCESS_KEY=$access2 -n kube-system`
 skfsac2s="$?"
-ssmstat aws-access-2 $skfsac2s
+ssmstat aws-access-2-create $skfsac2s
 
 }
 
@@ -54,9 +59,9 @@ ssmstat1="$@"
 
 if [[ $2 -eq 0 ]]
 then
-	echo "$1 create successful"
+	echo "$1 successful"
 else
-	echo "$1 create failed"
+	echo "$1 failed"
 fi
 }
 
@@ -65,12 +70,9 @@ if [[ "$1" = "-d" ]]
 then
 	filesecretdel
 	exit
+else
+	filecheck /etc/kubernetes/aws.conf $HOME/.kube/config
 fi
-
-
-
-
-filecheck /etc/kubernetes/aws.conf $HOME/.kube/config $HOME/access_id $HOME/secret_id 
 
 if [[ $gcount -eq $tf ]]
 then
